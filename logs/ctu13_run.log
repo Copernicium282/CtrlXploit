@@ -1,0 +1,259 @@
+05:12:09 INFO train: ctu13/temporal: 342698 train / 53630 val cells, train positive rate 0.0036
+05:12:14 INFO train: baseline Logistic Regression (single window)      thr 0.992 (5s)
+05:12:44 INFO train: baseline Logistic Regression (stacked 8)          thr 0.978 (30s)
+05:16:11 INFO train: baseline Gradient Boosting (stacked 8)            thr 0.944 (207s)
+05:16:52 INFO train: baseline Random Forest (stacked 8)                thr 0.410 (41s)
+05:17:24 INFO train: stage LR per horizon [1, 2, 3, 5, 7, 10] (33s)
+05:17:25 INFO sih_v2.models.trainer: training sequences: 33041 (benign-only segments sub-sampled every 12)
+05:18:38 INFO sih_v2.models.trainer: [world-model seed 0] epoch 01 loss 4.968 | val selection 0.5503 (72.9s)
+05:19:52 INFO sih_v2.models.trainer: [world-model seed 0] epoch 02 loss 3.895 | val selection 0.6631 (73.6s)
+05:20:58 INFO sih_v2.models.trainer: [world-model seed 0] epoch 03 loss 3.579 | val selection 0.6245 (66.7s)
+05:22:02 INFO sih_v2.models.trainer: [world-model seed 0] epoch 04 loss 3.436 | val selection 0.6005 (63.5s)
+05:23:23 INFO sih_v2.models.trainer: [world-model seed 0] epoch 05 loss 3.335 | val selection 0.5983 (81.5s)
+05:24:50 INFO sih_v2.models.trainer: [world-model seed 0] epoch 06 loss 3.272 | val selection 0.6883 (87.1s)
+05:26:16 INFO sih_v2.models.trainer: [world-model seed 0] epoch 07 loss 3.224 | val selection 0.6425 (85.9s)
+05:27:27 INFO sih_v2.models.trainer: [world-model seed 0] epoch 08 loss 3.182 | val selection 0.6080 (70.2s)
+05:28:33 INFO sih_v2.models.trainer: [world-model seed 0] epoch 09 loss 3.152 | val selection 0.6046 (66.5s)
+05:29:45 INFO sih_v2.models.trainer: [world-model seed 0] epoch 10 loss 3.129 | val selection 0.6711 (72.5s)
+05:29:45 INFO sih_v2.models.trainer: early stopping
+05:30:30 INFO train: seed 0: fusion {'direct': 0.9, 'rollout': 0.0, 'markov': 0.1} thresholds {'direct': 0.695, 'rollout': 0.772, 'markov': 0.788, 'fused': 0.688} val-select 0.6885 surprise AUC 0.574 (sign +1)
+05:30:31 INFO sih_v2.models.trainer: training sequences: 33041 (benign-only segments sub-sampled every 12)
+05:30:38 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 01 loss 0.174 | val selection 0.4914 (7.6s)
+05:30:46 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 02 loss 0.046 | val selection 0.6640 (7.6s)
+05:30:55 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 03 loss 0.036 | val selection 0.6063 (8.7s)
+05:31:04 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 04 loss 0.029 | val selection 0.6688 (9.1s)
+05:31:15 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 05 loss 0.026 | val selection 0.6834 (11.0s)
+05:31:25 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 06 loss 0.019 | val selection 0.6322 (10.8s)
+05:31:36 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 07 loss 0.017 | val selection 0.6986 (10.9s)
+05:31:47 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 08 loss 0.016 | val selection 0.6390 (10.8s)
+05:31:58 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 09 loss 0.014 | val selection 0.7164 (10.8s)
+05:32:09 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 10 loss 0.013 | val selection 0.6616 (11.2s)
+05:32:20 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 11 loss 0.012 | val selection 0.6534 (11.1s)
+05:32:32 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 12 loss 0.011 | val selection 0.6846 (11.6s)
+05:32:43 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 13 loss 0.011 | val selection 0.6790 (11.4s)
+05:32:43 INFO sih_v2.models.trainer: early stopping
+05:32:46 INFO sih_v2.models.trainer: training sequences: 33041 (benign-only segments sub-sampled every 12)
+05:34:02 INFO sih_v2.models.trainer: [world-model seed 1] epoch 01 loss 4.953 | val selection 0.5780 (75.6s)
+05:35:32 INFO sih_v2.models.trainer: [world-model seed 1] epoch 02 loss 3.987 | val selection 0.5851 (89.5s)
+05:37:02 INFO sih_v2.models.trainer: [world-model seed 1] epoch 03 loss 3.595 | val selection 0.5148 (90.5s)
+05:38:14 INFO sih_v2.models.trainer: [world-model seed 1] epoch 04 loss 3.410 | val selection 0.5622 (72.2s)
+05:39:21 INFO sih_v2.models.trainer: [world-model seed 1] epoch 05 loss 3.324 | val selection 0.5585 (67.1s)
+05:40:32 INFO sih_v2.models.trainer: [world-model seed 1] epoch 06 loss 3.266 | val selection 0.6502 (70.5s)
+05:41:55 INFO sih_v2.models.trainer: [world-model seed 1] epoch 07 loss 3.221 | val selection 0.5852 (82.7s)
+05:43:16 INFO sih_v2.models.trainer: [world-model seed 1] epoch 08 loss 3.177 | val selection 0.6363 (81.6s)
+05:44:38 INFO sih_v2.models.trainer: [world-model seed 1] epoch 09 loss 3.147 | val selection 0.5719 (81.4s)
+05:45:59 INFO sih_v2.models.trainer: [world-model seed 1] epoch 10 loss 3.124 | val selection 0.6024 (81.2s)
+05:45:59 INFO sih_v2.models.trainer: early stopping
+05:46:53 INFO train: seed 1: fusion {'direct': 0.8, 'rollout': 0.1, 'markov': 0.1} thresholds {'direct': 0.653, 'rollout': 0.603, 'markov': 0.625, 'fused': 0.634} val-select 0.6587 surprise AUC 0.574 (sign +1)
+05:46:53 INFO sih_v2.models.trainer: training sequences: 33041 (benign-only segments sub-sampled every 12)
+05:47:03 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 01 loss 0.180 | val selection 0.5948 (9.8s)
+05:47:13 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 02 loss 0.049 | val selection 0.7685 (10.4s)
+05:47:23 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 03 loss 0.037 | val selection 0.6486 (9.6s)
+05:47:32 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 04 loss 0.030 | val selection 0.6157 (9.3s)
+05:47:41 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 05 loss 0.023 | val selection 0.7042 (9.2s)
+05:47:51 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 06 loss 0.019 | val selection 0.6961 (9.2s)
+05:47:51 INFO sih_v2.models.trainer: early stopping
+05:47:53 INFO sih_v2.models.trainer: training sequences: 33041 (benign-only segments sub-sampled every 12)
+05:49:13 INFO sih_v2.models.trainer: [world-model seed 2] epoch 01 loss 5.004 | val selection 0.5605 (79.4s)
+05:50:32 INFO sih_v2.models.trainer: [world-model seed 2] epoch 02 loss 4.010 | val selection 0.5640 (79.5s)
+05:51:52 INFO sih_v2.models.trainer: [world-model seed 2] epoch 03 loss 3.641 | val selection 0.6493 (80.0s)
+05:53:14 INFO sih_v2.models.trainer: [world-model seed 2] epoch 04 loss 3.462 | val selection 0.5964 (82.0s)
+05:54:37 INFO sih_v2.models.trainer: [world-model seed 2] epoch 05 loss 3.340 | val selection 0.6218 (82.9s)
+05:56:00 INFO sih_v2.models.trainer: [world-model seed 2] epoch 06 loss 3.267 | val selection 0.5112 (83.3s)
+05:57:16 INFO sih_v2.models.trainer: [world-model seed 2] epoch 07 loss 3.216 | val selection 0.5877 (75.8s)
+05:57:16 INFO sih_v2.models.trainer: early stopping
+05:57:57 INFO train: seed 2: fusion {'direct': 0.7, 'rollout': 0.0, 'markov': 0.3} thresholds {'direct': 0.977, 'rollout': 0.884, 'markov': 0.866, 'fused': 0.943} val-select 0.6581 surprise AUC 0.619 (sign +1)
+05:57:57 INFO sih_v2.models.trainer: training sequences: 33041 (benign-only segments sub-sampled every 12)
+05:58:04 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 01 loss 0.180 | val selection 0.5890 (6.8s)
+05:58:11 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 02 loss 0.049 | val selection 0.6392 (7.0s)
+05:58:18 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 03 loss 0.034 | val selection 0.7140 (7.1s)
+05:58:25 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 04 loss 0.028 | val selection 0.7403 (7.0s)
+05:58:32 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 05 loss 0.023 | val selection 0.7073 (7.0s)
+05:58:39 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 06 loss 0.018 | val selection 0.6606 (7.0s)
+05:58:46 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 07 loss 0.016 | val selection 0.6878 (7.1s)
+05:58:53 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 08 loss 0.014 | val selection 0.6536 (7.0s)
+05:58:53 INFO sih_v2.models.trainer: early stopping
+05:58:55 INFO train: primary bundle = seed 0 -> models/ctu13/temporal/wm.pt (2807s)
+05:58:58 INFO evaluate: evaluating ctu13/temporal on 82117 cells ({'benign': 81741, 'during_attack': 291, 'pre_attack': 85})
+06:02:33 INFO evaluate: ours = NetWorldModel - fused (ours); wrote /Users/yashu/sih_v2/reports/ctu13/temporal
+                             Method    F1  F1 ±   FPR  PR-AUC  EW PR-AUC  Mean lead (min)
+ Persistence (oracle current label) 0.347 0.000 0.015   0.199      0.035            3.125
+Logistic Regression (single window) 0.370 0.000 0.013   0.193      0.027            2.500
+    Logistic Regression (stacked 8) 0.339 0.000 0.014   0.203      0.038            3.000
+      Gradient Boosting (stacked 8) 0.853 0.000 0.000   0.851      0.322            0.250
+          Random Forest (stacked 8) 0.867 0.000 0.000   0.861      0.370            1.375
+   LSTM classifier (no world model) 0.816 0.022 0.001   0.832      0.268            1.292
+        NetWorldModel - direct head 0.700 0.107 0.003   0.813      0.219            1.000
+     NetWorldModel - K-step rollout 0.771 0.012 0.001   0.804      0.204            1.125
+            Markov kill-chain prior 0.771 0.021 0.001   0.809      0.152            1.250
+       NetWorldModel - fused (ours) 0.699 0.109 0.003   0.815      0.218            1.250
+ stage forecasting (macro-F1 over stages present, malicious host-slots)
+
+| method | +1 | +2 | +3 | +5 | +7 | +10 |
+|---|---|---|---|---|---|---|
+| Markov kill-chain prior | 0.757 | 0.658 | 0.584 | 0.597 | 0.616 | 0.389 |
+| NetWorldModel rollout (ours) | 0.775 | 0.676 | 0.606 | 0.635 | 0.650 | 0.668 |
+| Persistence (inferred current stage) | 0.751 | 0.694 | 0.645 | 0.579 | 0.580 | 0.584 |
+| Persistence (oracle current stage) | 0.832 | 0.755 | 0.685 | 0.632 | 0.604 | 0.581 |
+| Stage LR per horizon (stacked) | 0.789 | 0.759 | 0.657 | 0.760 | 0.753 | 0.695 |
+
+Accuracy on cells whose stage *changes* by t+k (persistence scores 0 here by construction):
+
+| method | +1 | +2 | +3 | +5 | +7 | +10 |
+|---|---|---|---|---|---|---|
+| Markov kill-chain prior | 0.358 | 0.296 | 0.368 | 0.438 | 0.483 | 0.543 |
+| NetWorldModel rollout (ours) | 0.450 | 0.385 | 0.403 | 0.438 | 0.483 | 0.537 |
+| Persistence (inferred current stage) | 0.350 | 0.311 | 0.326 | 0.331 | 0.351 | 0.390 |
+| Persistence (oracle current stage) | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| Stage LR per horizon (stacked) | 0.383 | 0.363 | 0.431 | 0.615 | 0.632 | 0.530 |
+
+## Host-level triage (two channels)
+
+- infected host-slots caught: **16/46** (risk channel 16, anomaly channel only 0)
+- false alarms: 43/1694 benign host-slots (2.5%); risk channel alone 43
+
+## Label-free surprise channel
+
+- direction chosen on validation: sign +1 (validation raw AUC 0.574)
+- test window-level AUC (malicious vs benign cells): 0.492 (KL variant 0.290)
+- test host-level AUC: surprise 0.355 vs supervised risk 0.832
+
+## Integrity checks
+
+- **split integrity (temporal)** - OK: no overlap  `{'issues': []}`
+- **schedule-only probe (hour, weekday, elapsed time)** - OK: timing alone is far weaker than the traffic model  `{'schedule_ap': 0.0098, 'prevalence': 0.0044, 'model_ap': 0.815, 'schedule_share_of_lift': 0.0066}`
+- **capture-identity probe** - reported for context: which capture you are in carries this much signal  `{'identity_ap': 0.0143, 'prevalence': 0.0044}`
+- **label-permutation test of test PR-AUC** - OK: p < 0.00498 (signal above label-permuted chance)  `{'observed_ap': 0.8076, 'null_mean': 0.0046, 'null_p99': 0.0058, 'p_value': 0.005}`
+- **no-peeking gradient test** - OK: imagination never touches observations (and the check can fail)  `{'encoder_grad_detached': 0.0, 'encoder_grad_wired': 2068.1531}`
+- **out-of-distribution benign (flash crowd x5; novel values in ['fin_ratio', 'psh_ratio', 'ack_ratio'])** - OK:
+06:02:35 INFO train: ctu13/family: 389878 train / 7182 val cells, train positive rate 0.0026
+06:02:38 INFO train: baseline Logistic Regression (single window)      thr 0.094 (3s)
+06:02:58 INFO train: baseline Logistic Regression (stacked 8)          thr 0.025 (20s)
+06:06:51 INFO train: baseline Gradient Boosting (stacked 8)            thr 0.002 (232s)
+06:07:44 INFO train: baseline Random Forest (stacked 8)                thr 0.007 (54s)
+06:08:08 INFO train: stage LR per horizon [1, 2, 3, 5, 7, 10] (23s)
+06:08:08 INFO sih_v2.models.trainer: training sequences: 38638 (benign-only segments sub-sampled every 12)
+06:10:29 INFO sih_v2.models.trainer: [world-model seed 0] epoch 01 loss 4.612 | val selection 0.0254 (140.3s)
+06:12:20 INFO sih_v2.models.trainer: [world-model seed 0] epoch 02 loss 3.686 | val selection 0.0553 (110.7s)
+06:13:56 INFO sih_v2.models.trainer: [world-model seed 0] epoch 03 loss 3.355 | val selection 0.0487 (96.1s)
+06:16:12 INFO sih_v2.models.trainer: [world-model seed 0] epoch 04 loss 3.233 | val selection 0.0523 (136.2s)
+06:18:30 INFO sih_v2.models.trainer: [world-model seed 0] epoch 05 loss 3.158 | val selection 0.0643 (137.9s)
+06:20:47 INFO sih_v2.models.trainer: [world-model seed 0] epoch 06 loss 3.104 | val selection 0.0653 (137.2s)
+06:23:02 INFO sih_v2.models.trainer: [world-model seed 0] epoch 07 loss 3.063 | val selection 0.0513 (134.2s)
+06:25:19 INFO sih_v2.models.trainer: [world-model seed 0] epoch 08 loss 3.028 | val selection 0.0504 (137.7s)
+06:27:19 INFO sih_v2.models.trainer: [world-model seed 0] epoch 09 loss 3.001 | val selection 0.0748 (119.7s)
+06:28:54 INFO sih_v2.models.trainer: [world-model seed 0] epoch 10 loss 2.979 | val selection 0.0537 (94.5s)
+06:30:00 INFO sih_v2.models.trainer: [world-model seed 0] epoch 11 loss 2.961 | val selection 0.0596 (65.9s)
+06:31:06 INFO sih_v2.models.trainer: [world-model seed 0] epoch 12 loss 2.948 | val selection 0.0672 (67.0s)
+06:32:13 INFO sih_v2.models.trainer: [world-model seed 0] epoch 13 loss 2.941 | val selection 0.0674 (66.5s)
+06:32:13 INFO sih_v2.models.trainer: early stopping
+06:32:18 INFO train: seed 0: fusion {'direct': 0.0, 'rollout': 0.7, 'markov': 0.3} thresholds {'direct': 0.031, 'rollout': 0.064, 'markov': 0.241, 'fused': 0.066} val-select 0.1563 surprise AUC 0.582 (sign +1)
+06:32:18 INFO sih_v2.models.trainer: training sequences: 38638 (benign-only segments sub-sampled every 12)
+06:32:25 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 01 loss 0.199 | val selection 0.0415 (6.5s)
+06:32:31 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 02 loss 0.087 | val selection 0.0489 (6.7s)
+06:32:38 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 03 loss 0.074 | val selection 0.0502 (6.8s)
+06:32:45 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 04 loss 0.064 | val selection 0.0546 (6.7s)
+06:32:51 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 05 loss 0.054 | val selection 0.0384 (6.6s)
+06:32:58 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 06 loss 0.045 | val selection 0.0400 (6.6s)
+06:33:05 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 07 loss 0.038 | val selection 0.0446 (6.8s)
+06:33:12 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 08 loss 0.035 | val selection 0.0581 (6.8s)
+06:33:19 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 09 loss 0.030 | val selection 0.0487 (7.0s)
+06:33:27 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 10 loss 0.029 | val selection 0.0429 (8.0s)
+06:33:35 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 11 loss 0.027 | val selection 0.0429 (8.4s)
+06:33:44 INFO sih_v2.models.trainer: [lstm-baseline seed 0] epoch 12 loss 0.025 | val selection 0.0449 (8.7s)
+06:33:44 INFO sih_v2.models.trainer: early stopping
+06:33:44 INFO sih_v2.models.trainer: training sequences: 38638 (benign-only segments sub-sampled every 12)
+06:35:04 INFO sih_v2.models.trainer: [world-model seed 1] epoch 01 loss 4.609 | val selection 0.0286 (80.1s)
+06:36:09 INFO sih_v2.models.trainer: [world-model seed 1] epoch 02 loss 3.669 | val selection 0.0478 (64.1s)
+06:37:11 INFO sih_v2.models.trainer: [world-model seed 1] epoch 03 loss 3.339 | val selection 0.0502 (62.6s)
+06:38:14 INFO sih_v2.models.trainer: [world-model seed 1] epoch 04 loss 3.228 | val selection 0.0331 (62.5s)
+06:39:16 INFO sih_v2.models.trainer: [world-model seed 1] epoch 05 loss 3.154 | val selection 0.0173 (62.3s)
+06:40:18 INFO sih_v2.models.trainer: [world-model seed 1] epoch 06 loss 3.097 | val selection 0.0240 (62.6s)
+06:41:21 INFO sih_v2.models.trainer: [world-model seed 1] epoch 07 loss 3.049 | val selection 0.0285 (62.6s)
+06:41:21 INFO sih_v2.models.trainer: early stopping
+06:41:26 INFO train: seed 1: fusion {'direct': 0.0, 'rollout': 1.0, 'markov': 0.0} thresholds {'direct': 0.015, 'rollout': 0.105, 'markov': 0.218, 'fused': 0.105} val-select 0.0665 surprise AUC 0.569 (sign +1)
+06:41:26 INFO sih_v2.models.trainer: training sequences: 38638 (benign-only segments sub-sampled every 12)
+06:41:33 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 01 loss 0.203 | val selection 0.0405 (6.6s)
+06:41:39 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 02 loss 0.085 | val selection 0.0491 (6.5s)
+06:41:46 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 03 loss 0.074 | val selection 0.0423 (6.6s)
+06:41:52 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 04 loss 0.066 | val selection 0.0345 (6.5s)
+06:41:59 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 05 loss 0.060 | val selection 0.0416 (6.5s)
+06:42:05 INFO sih_v2.models.trainer: [lstm-baseline seed 1] epoch 06 loss 0.052 | val selection 0.0456 (6.6s)
+06:42:05 INFO sih_v2.models.trainer: early stopping
+06:42:06 INFO sih_v2.models.trainer: training sequences: 38638 (benign-only segments sub-sampled every 12)
+06:43:09 INFO sih_v2.models.trainer: [world-model seed 2] epoch 01 loss 4.584 | val selection 0.0349 (63.1s)
+06:44:12 INFO sih_v2.models.trainer: [world-model seed 2] epoch 02 loss 3.762 | val selection 0.0426 (63.3s)
+06:45:18 INFO sih_v2.models.trainer: [world-model seed 2] epoch 03 loss 3.389 | val selection 0.0289 (65.6s)
+06:46:20 INFO sih_v2.models.trainer: [world-model seed 2] epoch 04 loss 3.238 | val selection 0.0296 (62.3s)
+06:47:23 INFO sih_v2.models.trainer: [world-model seed 2] epoch 05 loss 3.167 | val selection 0.0309 (62.8s)
+06:48:25 INFO sih_v2.models.trainer: [world-model seed 2] epoch 06 loss 3.116 | val selection 0.0522 (62.6s)
+06:49:29 INFO sih_v2.models.trainer: [world-model seed 2] epoch 07 loss 3.075 | val selection 0.0544 (63.2s)
+06:50:31 INFO sih_v2.models.trainer: [world-model seed 2] epoch 08 loss 3.043 | val selection 0.0483 (62.4s)
+06:51:34 INFO sih_v2.models.trainer: [world-model seed 2] epoch 09 loss 3.012 | val selection 0.0619 (62.6s)
+06:52:37 INFO sih_v2.models.trainer: [world-model seed 2] epoch 10 loss 2.989 | val selection 0.0477 (63.3s)
+06:53:40 INFO sih_v2.models.trainer: [world-model seed 2] epoch 11 loss 2.970 | val selection 0.0455 (63.0s)
+06:54:42 INFO sih_v2.models.trainer: [world-model seed 2] epoch 12 loss 2.958 | val selection 0.0370 (61.9s)
+06:55:44 INFO sih_v2.models.trainer: [world-model seed 2] epoch 13 loss 2.948 | val selection 0.0460 (62.3s)
+06:55:44 INFO sih_v2.models.trainer: early stopping
+06:55:49 INFO train: seed 2: fusion {'direct': 0.0, 'rollout': 1.0, 'markov': 0.0} thresholds {'direct': 0.001, 'rollout': 0.027, 'markov': 0.036, 'fused': 0.027} val-select 0.1761 surprise AUC 0.579 (sign +1)
+06:55:49 INFO sih_v2.models.trainer: training sequences: 38638 (benign-only segments sub-sampled every 12)
+06:55:55 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 01 loss 0.204 | val selection 0.0485 (6.3s)
+06:56:02 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 02 loss 0.083 | val selection 0.0601 (6.4s)
+06:56:08 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 03 loss 0.074 | val selection 0.0544 (6.4s)
+06:56:15 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 04 loss 0.063 | val selection 0.0471 (6.4s)
+06:56:21 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 05 loss 0.053 | val selection 0.0496 (6.4s)
+06:56:27 INFO sih_v2.models.trainer: [lstm-baseline seed 2] epoch 06 loss 0.045 | val selection 0.0466 (6.4s)
+06:56:27 INFO sih_v2.models.trainer: early stopping
+06:56:28 INFO train: primary bundle = seed 2 -> models/ctu13/family/wm.pt (3233s)
+06:56:31 INFO evaluate: evaluating ctu13/family on 137887 cells ({'benign': 136630, 'during_attack': 1096, 'pre_attack': 161})
+07:02:52 INFO evaluate: ours = NetWorldModel - fused (ours); wrote /Users/yashu/sih_v2/reports/ctu13/family
+                             Method    F1  F1 ±   FPR  PR-AUC  EW PR-AUC  Mean lead (min)
+ Persistence (oracle current label) 0.732 0.000 0.006   0.572      0.112            4.857
+Logistic Regression (single window) 0.029 0.000 0.061   0.054      0.028            4.714
+    Logistic Regression (stacked 8) 0.032 0.000 0.050   0.072      0.058            4.286
+      Gradient Boosting (stacked 8) 0.153 0.000 0.026   0.125      0.072            5.000
+          Random Forest (stacked 8) 0.159 0.000 0.031   0.161      0.158            7.143
+   LSTM classifier (no world model) 0.091 0.026 0.016   0.078      0.048            5.476
+        NetWorldModel - direct head 0.089 0.020 0.017   0.085      0.067            5.143
+     NetWorldModel - K-step rollout 0.079 0.029 0.032   0.057      0.050            4.667
+            Markov kill-chain prior 0.096 0.030 0.026   0.076      0.051            5.095
+       NetWorldModel - fused (ours) 0.080 0.030 0.032   0.062      0.048            4.667
+ stage forecasting (macro-F1 over stages present, malicious host-slots)
+
+| method | +1 | +2 | +3 | +5 | +7 | +10 |
+|---|---|---|---|---|---|---|
+| Markov kill-chain prior | 0.216 | 0.208 | 0.202 | 0.164 | 0.065 | 0.059 |
+| NetWorldModel rollout (ours) | 0.208 | 0.207 | 0.203 | 0.199 | 0.190 | 0.186 |
+| Persistence (inferred current stage) | 0.210 | 0.205 | 0.204 | 0.193 | 0.190 | 0.192 |
+| Persistence (oracle current stage) | 0.725 | 0.620 | 0.554 | 0.510 | 0.512 | 0.500 |
+| Stage LR per horizon (stacked) | 0.207 | 0.210 | 0.213 | 0.195 | 0.180 | 0.166 |
+
+Accuracy on cells whose stage *changes* by t+k (persistence scores 0 here by construction):
+
+| method | +1 | +2 | +3 | +5 | +7 | +10 |
+|---|---|---|---|---|---|---|
+| Markov kill-chain prior | 0.175 | 0.137 | 0.115 | 0.094 | 0.105 | 0.103 |
+| NetWorldModel rollout (ours) | 0.160 | 0.137 | 0.115 | 0.089 | 0.087 | 0.084 |
+| Persistence (inferred current stage) | 0.165 | 0.130 | 0.112 | 0.084 | 0.087 | 0.081 |
+| Persistence (oracle current stage) | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| Stage LR per horizon (stacked) | 0.145 | 0.130 | 0.148 | 0.053 | 0.066 | 0.062 |
+
+## Host-level triage (two channels)
+
+- infected host-slots caught: **4/5** (risk channel 4, anomaly channel only 0)
+- false alarms: 294/1058 benign host-slots (27.8%); risk channel alone 285
+
+## Label-free surprise channel
+
+- direction chosen on validation: sign +1 (validation raw AUC 0.579)
+- test window-level AUC (malicious vs benign cells): 0.795 (KL variant 0.578)
+- test host-level AUC: surprise 0.853 vs supervised risk 0.882
+
+## Integrity checks
+
+- **split integrity (family)** - OK: no overlap  `{'issues': []}`
+- **schedule-only probe (hour, weekday, elapsed time)** - OK: timing alone is far weaker than the traffic model  `{'schedule_ap': 0.0103, 'prevalence': 0.0091, 'model_ap': 0.0618, 'schedule_share_of_lift': 0.0227}`
+- **capture-identity probe** - N/A: test captures unseen in training (family protocol)  `{}`
+- **label-permutation test of test PR-AUC** - OK: p < 0.00498 (signal above label-permuted chance)  `{'observed_ap': 0.0391, 'null_mean': 0.0091, 'null_p99': 0.0099, 'p_value': 0.005}`
+- **no-peeking gradient test** - OK: imagination never touches observations (and the check can fail)  `{'encoder_grad_detached': 0.0, 'encoder_grad_wired': 3349.3083}`
+- **out-of-distribution benign (flash crowd x5; novel values in ['fin_ratio', 'psh_ratio', 'ack_ratio'])** - OK: risk channel stays quiet on unusual benign traffic  `{'cells

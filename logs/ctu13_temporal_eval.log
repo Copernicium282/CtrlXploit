@@ -1,0 +1,53 @@
+06:07:07 INFO evaluate: evaluating ctu13/temporal on 82117 cells ({'benign': 81741, 'during_attack': 291, 'pre_attack': 85})
+06:12:37 INFO evaluate: ours = NetWorldModel - fused (ours); wrote /Users/yashu/sih_v2/reports/ctu13/temporal
+                                        Method    F1  F1 ±   FPR  PR-AUC  EW PR-AUC  Mean lead (min)
+            Persistence (oracle current label) 0.347 0.000 0.015   0.199      0.035            3.125
+           Logistic Regression (single window) 0.370 0.000 0.013   0.193      0.027            2.500
+               Logistic Regression (stacked 8) 0.339 0.000 0.014   0.203      0.038            3.000
+                 Gradient Boosting (stacked 8) 0.853 0.000 0.000   0.851      0.322            0.250
+                     Random Forest (stacked 8) 0.867 0.000 0.000   0.861      0.370            1.375
+              LSTM classifier (no world model) 0.816 0.022 0.001   0.832      0.268            1.292
+                   NetWorldModel - direct head 0.700 0.107 0.003   0.813      0.219            1.000
+                NetWorldModel - K-step rollout 0.771 0.012 0.001   0.804      0.204            1.125
+                       Markov kill-chain prior 0.771 0.021 0.001   0.809      0.152            1.250
+                  NetWorldModel - fused (ours) 0.699 0.109 0.003   0.815      0.218            1.250
+NetWorldModel ⊕ tree ensemble (ours, ensemble) 0.867 0.000 0.000   0.861      0.370            1.375
+ stage forecasting (macro-F1 over stages present, malicious host-slots)
+
+| method | +1 | +2 | +3 | +5 | +7 | +10 |
+|---|---|---|---|---|---|---|
+| Markov kill-chain prior | 0.757 | 0.658 | 0.584 | 0.597 | 0.616 | 0.389 |
+| NetWorldModel rollout (ours) | 0.775 | 0.676 | 0.606 | 0.635 | 0.650 | 0.668 |
+| Persistence (inferred current stage) | 0.751 | 0.694 | 0.645 | 0.579 | 0.580 | 0.584 |
+| Persistence (oracle current stage) | 0.832 | 0.755 | 0.685 | 0.632 | 0.604 | 0.581 |
+| Stage LR per horizon (stacked) | 0.789 | 0.759 | 0.657 | 0.760 | 0.753 | 0.695 |
+
+Accuracy on cells whose stage *changes* by t+k (persistence scores 0 here by construction):
+
+| method | +1 | +2 | +3 | +5 | +7 | +10 |
+|---|---|---|---|---|---|---|
+| Markov kill-chain prior | 0.358 | 0.296 | 0.368 | 0.438 | 0.483 | 0.543 |
+| NetWorldModel rollout (ours) | 0.450 | 0.385 | 0.403 | 0.438 | 0.483 | 0.537 |
+| Persistence (inferred current stage) | 0.350 | 0.311 | 0.326 | 0.331 | 0.351 | 0.390 |
+| Persistence (oracle current stage) | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| Stage LR per horizon (stacked) | 0.383 | 0.363 | 0.431 | 0.615 | 0.632 | 0.530 |
+
+## Host-level triage (two channels)
+
+- infected host-slots caught: **16/46** (risk channel 16, anomaly channel only 0)
+- false alarms: 43/1694 benign host-slots (2.5%); risk channel alone 43
+
+## Label-free surprise channel
+
+- direction chosen on validation: sign +1 (validation raw AUC 0.574)
+- test window-level AUC (malicious vs benign cells): 0.492 (KL variant 0.290)
+- test host-level AUC: surprise 0.355 vs supervised risk 0.832
+
+## Integrity checks
+
+- **split integrity (temporal)** - OK: no overlap  `{'issues': []}`
+- **schedule-only probe (hour, weekday, elapsed time)** - OK: timing alone is far weaker than the traffic model  `{'schedule_ap': 0.0098, 'prevalence': 0.0044, 'model_ap': 0.815, 'schedule_share_of_lift': 0.0066}`
+- **capture-identity probe** - reported for context: which capture you are in carries this much signal  `{'identity_ap': 0.0143, 'prevalence': 0.0044}`
+- **label-permutation test of test PR-AUC** - OK: p < 0.00498 (signal above label-permuted chance)  `{'observed_ap': 0.8076, 'null_mean': 0.0046, 'null_p99': 0.0058, 'p_value': 0.005}`
+- **no-peeking gradient test** - OK: imagination never touches observations (and the check can fail)  `{'encoder_grad_detached': 0.0, 'encoder_grad_wired': 2068.1531}`
+- **out-of-distribution benign (flash crowd x5; novel values in ['fin_ratio', 'psh_ratio', 'ack_ratio'])** - OK:

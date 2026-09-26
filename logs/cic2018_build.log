@@ -1,0 +1,35 @@
+05:12:08 INFO build_dataset: downloading Thursday-22-02-2018
+05:23:08 INFO sih_v2.ingest.csv_reader: Thursday-22-02-2018.csv: 1048575 valid flows
+05:23:10 INFO build_dataset: capture Thursday-22-02-2018: 1048575 flows -> 1048575 kept -> 557 cells, 10 segments
+05:23:10 INFO build_dataset: project data footprint 0.27 GB (budget 7.0 GB)
+05:23:10 INFO build_dataset: downloading Friday-23-02-2018
+05:24:18 INFO sih_v2.ingest.csv_reader: Friday-23-02-2018.csv: 1048575 valid flows
+05:24:19 INFO build_dataset: capture Friday-23-02-2018: 1048575 flows -> 1048575 kept -> 556 cells, 2 segments
+05:24:19 INFO build_dataset: project data footprint 0.27 GB (budget 7.0 GB)
+05:24:19 INFO build_dataset: downloading Wednesday-28-02-2018
+05:24:51 INFO sih_v2.ingest.csv_reader: Wednesday-28-02-2018.csv: 613071 valid flows
+05:24:52 INFO build_dataset: capture Wednesday-28-02-2018: 613071 flows -> 613071 kept -> 570 cells, 2 segments
+05:24:52 INFO build_dataset: project data footprint 0.27 GB (budget 7.0 GB)
+05:24:52 INFO build_dataset: downloading Thursday-01-03-2018
+05:28:02 INFO sih_v2.ingest.csv_reader: Thursday-01-03-2018.csv: 331100 valid flows
+05:28:02 INFO build_dataset: capture Thursday-01-03-2018: 331100 flows -> 331100 kept -> 570 cells, 2 segments
+05:28:02 INFO build_dataset: project data footprint 0.27 GB (budget 7.0 GB)
+05:28:02 INFO build_dataset: downloading Friday-02-03-2018
+05:29:09 INFO sih_v2.ingest.csv_reader: Friday-02-03-2018.csv: 1048575 valid flows
+05:29:11 INFO build_dataset: capture Friday-02-03-2018: 1048575 flows -> 1048575 kept -> 525 cells, 2 segments
+05:29:11 INFO build_dataset: project data footprint 0.27 GB (budget 7.0 GB)
+05:29:11 INFO build_dataset: project data footprint 0.27 GB (budget 7.0 GB)
+05:29:11 INFO build_dataset: cic2018: 4391 cells, 31 segments -> /Users/yashu/sih_v2/data/processed/cic2018/cells.parquet (1022.6s)
+split_temporal
+ phase           benign  during_attack  pre_attack
+split_temporal
+purged             273            133          36
+test              1219            535          66
+train             1171            436          55
+val                255            147          65
+split_family
+ phase         benign  during_attack  pre_attack
+split_family
+test             568            497          30
+train           1558            479         133
+val              792            275          59
