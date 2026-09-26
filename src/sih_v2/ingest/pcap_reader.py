@@ -20,6 +20,7 @@ import pandas as pd
 from .schema import normalize_frame
 
 LINK_ETHERNET, LINK_RAW, LINK_RAW_ALT, LINK_SLL, LINK_IPV4 = 1, 101, 12, 113, 228
+SMALL_PAYLOAD = 64      # bytes; scan probes and bare handshakes sit at or below this
 
 
 @dataclass
@@ -36,6 +37,8 @@ class Packet:
     window: int = 0
     seq: int = 0
     payload: int = 0
+    ip_flags: int = 0    # IPv4 flags field: 0x1 = MF (more fragments), 0x2 = DF (don't fragment)
+    frag_off: int = 0    # IPv4 fragment offset in 8-byte units (0 = first fragment)
 
 
 def _iter_pcap(fh: BinaryIO) -> Iterator[tuple[float, int, bytes]]:
@@ -134,10 +137,12 @@ def _decode(ts: float, linktype: int, data: bytes) -> Packet | None:
         return None
     ihl = (ip[0] & 0x0F) * 4
     total_len = struct.unpack("!H", ip[2:4])[0]
+    frag_field = struct.unpack("!H", ip[6:8])[0]
     ttl, proto = ip[8], ip[9]
     src, dst = socket.inet_ntoa(ip[12:16]), socket.inet_ntoa(ip[16:20])
     l4 = ip[ihl:]
-    pkt = Packet(ts, src, dst, 0, 0, proto, ttl, total_len)
+    pkt = Packet(ts, src, dst, 0, 0, proto, ttl, total_len,
+                 ip_flags=frag_field >> 13, frag_off=frag_field & 0x1FFF)
     if proto == 6 and len(l4) >= 20:
         pkt.sport, pkt.dport, pkt.seq = struct.unpack("!HHI", l4[:8])
         doff = (l4[12] >> 4) * 4
@@ -169,8 +174,14 @@ class _Flow:
     init_win: int = -1
     iat_sum: float = 0.0
     iat_sq: float = 0.0
+    iat_max: float = 0.0
     n_iat: int = 0
     retrans: int = 0
+    frag_pkts: int = 0        # packets with MF set or a non-zero fragment offset
+    df_pkts: int = 0          # packets with DF set
+    payload_sum: float = 0.0
+    payload_sq: float = 0.0
+    payload_small: int = 0    # packets whose payload is a scan-sized <= SMALL_PAYLOAD bytes
     seen_seq: set = field(default_factory=set)
 
     def add(self, p: Packet, forward: bool) -> None:
@@ -178,6 +189,7 @@ class _Flow:
             d = max(p.ts - self.last, 0.0)
             self.iat_sum += d
             self.iat_sq += d * d
+            self.iat_max = max(self.iat_max, d)
             self.n_iat += 1
         self.last = max(self.last, p.ts)
         if forward:
@@ -190,6 +202,14 @@ class _Flow:
             self.bwd_bytes += p.length
         self.ttl_sum += p.ttl
         self.ttl_sq += p.ttl * p.ttl
+        if p.ip_flags & 0x1 or p.frag_off:      # MF set, or a continuation fragment
+            self.frag_pkts += 1
+        if p.ip_flags & 0x2:
+            self.df_pkts += 1
+        self.payload_sum += p.payload
+        self.payload_sq += p.payload * p.payload
+        if p.payload <= SMALL_PAYLOAD:
+            self.payload_small += 1
         if p.proto == 6:
             for bit, name in ((0x02, "syn"), (0x10, "ack"), (0x01, "fin"), (0x04, "rst"), (0x08, "psh"), (0x20, "urg")):
                 if p.flags & bit:
@@ -204,6 +224,7 @@ class _Flow:
     def row(self) -> dict:
         n = self.fwd_pkts + self.bwd_pkts
         ttl_m = self.ttl_sum / n
+        pl_m = self.payload_sum / n
         iat_m = self.iat_sum / self.n_iat if self.n_iat else 0.0
         return {
             "Timestamp": self.first, "Src IP": self.src, "Dst IP": self.dst,
@@ -216,6 +237,10 @@ class _Flow:
             "Init Fwd Win Byts": max(self.init_win, 0),
             "iat_mean": iat_m,
             "iat_std": math.sqrt(max(self.iat_sq / self.n_iat - iat_m ** 2, 0.0)) if self.n_iat else 0.0,
+            "iat_max": self.iat_max,
+            "Frag Pkts": self.frag_pkts, "DF Pkts": self.df_pkts,
+            "Payload Mean": pl_m, "Payload Std": math.sqrt(max(self.payload_sq / n - pl_m ** 2, 0.0)),
+            "Payload Small Pkts": self.payload_small,
             "Retrans": self.retrans, "Label": "Benign",
         }
 
@@ -271,7 +296,8 @@ def write_pcap(path: str | Path, packets: list[Packet]) -> None:
                 l4 = struct.pack("!HHHH", p.sport, p.dport, 8 + p.payload, 0)
             l4 += b"\x00" * p.payload
             total = 20 + len(l4)
-            ip = struct.pack("!BBHHHBBH4s4s", 0x45, 0, total, 0, 0, p.ttl, p.proto, 0,
+            frag = ((p.ip_flags & 0x7) << 13) | (p.frag_off & 0x1FFF)
+            ip = struct.pack("!BBHHHBBH4s4s", 0x45, 0, total, 0, frag, p.ttl, p.proto, 0,
                              socket.inet_aton(p.src), socket.inet_aton(p.dst))
             frame = b"\x00" * 12 + b"\x08\x00" + ip + l4
             sec = int(p.ts)

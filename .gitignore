@@ -1,6 +1,13 @@
 .venv/
 __pycache__/
 *.pyc
-data/raw/
 .pytest_cache/
-data/
+# Datasets are rebuilt from their public sources (`make data`); only the small bundled
+# sample set the dashboard and the tests read is tracked. `data/*` rather than `data/`
+# so the negation below can re-include the samples - git cannot re-include files whose
+# parent directory is excluded.
+data/*
+!data/sample/
+# written into local_dir by huggingface_hub snapshot_download() when fetch-data runs
+.cache/
+.huggingface/

@@ -16,9 +16,17 @@ CANON_COLUMNS = [
     "ts", "src_ip", "dst_ip", "src_port", "dst_port", "proto", "duration",
     "fwd_pkts", "bwd_pkts", "fwd_bytes", "bwd_bytes",
     "syn", "ack", "fin", "rst", "psh", "urg",
-    "ttl_mean", "ttl_std", "init_win", "iat_mean", "iat_std", "retrans", "label",
+    "ttl_mean", "ttl_std", "init_win", "iat_mean", "iat_std", "iat_max",
+    "frag_pkts", "df_pkts", "payload_mean", "payload_std", "payload_small_pkts",
+    "retrans", "label",
 ]
 NUMERIC = [c for c in CANON_COLUMNS if c not in ("ts", "src_ip", "dst_ip", "label")]
+
+# Columns a given source may legitimately not have. They keep NaN through
+# normalisation so downstream cells can report the absence; everything else is
+# zero-filled, because a zero there is a real measurement.
+MISSING_OK = ("ttl_mean", "ttl_std", "iat_max", "frag_pkts", "df_pkts",
+              "payload_mean", "payload_std", "payload_small_pkts")
 
 
 def _key(name: str) -> str:
@@ -54,10 +62,14 @@ for _f in ("syn", "ack", "fin", "rst", "psh", "urg"):
 _alias("ttl_mean", 1.0, "TTL Mean", "sttl", "TTL", "ttl_mean")
 _alias("ttl_std", 1.0, "TTL Std", "ttl_std")
 _alias("init_win", 1.0, "Init Fwd Win Byts", "Init_Win_bytes_forward", "swin", "init_win")
-_alias("iat_mean", 1e-6, "Flow IAT Mean")                  # microseconds
-_alias("iat_std", 1e-6, "Flow IAT Std")
-_alias("iat_mean", 1.0, "iat_mean")
-_alias("iat_std", 1.0, "iat_std")
+for _iat in ("iat_mean", "iat_std", "iat_max"):
+    _alias(_iat, 1e-6, "Flow IAT " + _iat.split("_")[1].capitalize())    # CICFlowMeter: microseconds
+    _alias(_iat, 1.0, _iat)                                              # PCAP reader: seconds
+_alias("frag_pkts", 1.0, "Frag Pkts", "frag_pkts")
+_alias("df_pkts", 1.0, "DF Pkts", "df_pkts")
+_alias("payload_mean", 1.0, "Payload Mean", "payload_mean")
+_alias("payload_std", 1.0, "Payload Std", "payload_std")
+_alias("payload_small_pkts", 1.0, "Payload Small Pkts", "payload_small_pkts")
 _alias("retrans", 1.0, "Retrans", "Retransmissions", "retrans")
 _alias("label", 1.0, "Label", "attack_cat", "label")
 
@@ -167,15 +179,15 @@ def normalize_frame(raw: pd.DataFrame, mapping: dict | None = None) -> pd.DataFr
                 df[c] = "0.0.0.0"
             elif c == "label":
                 df[c] = "Benign"
-            elif c in ("ttl_mean", "ttl_std"):
+            elif c in MISSING_OK:
                 df[c] = np.nan            # genuinely unavailable (e.g. CICFlowMeter)
             else:
                 df[c] = 0.0
     df = df[CANON_COLUMNS]
     num = df[NUMERIC].replace([np.inf, -np.inf], np.nan)
-    ttl = num[["ttl_mean", "ttl_std"]]
+    keep = num[list(MISSING_OK)]
     num = num.fillna(0.0).clip(lower=0)
-    num[["ttl_mean", "ttl_std"]] = ttl.clip(lower=0)
+    num[list(MISSING_OK)] = keep.clip(lower=0)
     df[NUMERIC] = num.astype("float32")
     df = df[df["ts"].notna()].copy()
     df["label"] = df["label"].fillna("Benign").astype(str).str.strip()

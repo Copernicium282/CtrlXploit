@@ -27,7 +27,7 @@ W = 60.0  # seconds per generator tick (matches default window)
 CIC_COLUMNS = [
     "Src IP", "Src Port", "Dst IP", "Dst Port", "Protocol", "Timestamp", "Flow Duration",
     "Tot Fwd Pkts", "Tot Bwd Pkts", "TotLen Fwd Pkts", "TotLen Bwd Pkts",
-    "Flow IAT Mean", "Flow IAT Std", "FIN Flag Cnt", "SYN Flag Cnt", "RST Flag Cnt",
+    "Flow IAT Mean", "Flow IAT Std", "Flow IAT Max", "FIN Flag Cnt", "SYN Flag Cnt", "RST Flag Cnt",
     "PSH Flag Cnt", "ACK Flag Cnt", "URG Flag Cnt", "Init Fwd Win Byts",
     "TTL Mean", "TTL Std", "Retrans", "Label",
 ]
@@ -61,6 +61,7 @@ def _flows(rng, n, t0, src, dst, dport, proto, dur, fpk, bpk, fby, bby, ttl, ttl
         "Tot Fwd Pkts": fpk.astype(int), "Tot Bwd Pkts": bpk.astype(int),
         "TotLen Fwd Pkts": arr(fby, float).astype(int), "TotLen Bwd Pkts": arr(bby, float).astype(int),
         "Flow IAT Mean": iat * 1e6, "Flow IAT Std": iat * 1e6 * rng.uniform(0.2, 1.4, n),
+        "Flow IAT Max": iat * 1e6 * rng.uniform(1.5, 4.0, n),      # always above the mean, like a real capture
         "FIN Flag Cnt": np.where(tcp, rng.integers(0, 3, n), 0),
         "SYN Flag Cnt": np.where(tcp, 1 if syn is None else arr(syn), 0),
         "RST Flag Cnt": np.where(tcp, (rng.random(n) < 0.03).astype(int) if rst is None else arr(rst), 0),

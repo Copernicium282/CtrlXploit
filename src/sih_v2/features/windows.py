@@ -30,9 +30,12 @@ BASE_FEATURES = [
     "n_src_ips", "n_dst_ips", "n_dst_ports", "dst_port_entropy", "dst_ip_entropy",
     "syn_ratio", "ack_ratio", "fin_ratio", "rst_ratio", "psh_ratio", "urg_ratio",
     "flag_bitmask_entropy", "ttl_mean", "ttl_std", "init_win_mean", "init_win_std",
-    "log_iat_mean", "log_iat_std", "retrans_rate", "small_flow_frac", "log_out_in_ratio",
+    "log_iat_mean", "log_iat_std", "log_iat_max", "retrans_rate", "small_flow_frac", "log_out_in_ratio",
     "lateral_frac", "sensitive_port_frac", "udp_frac", "dns_frac", "beacon_score",
+    "log_payload_mean", "payload_std", "payload_small_frac", "frag_frac", "df_frac",
+    "scan_step_mean", "scan_seq_frac",
 ]
+SCAN_STEP = 2                    # |delta port| <= this counts as a sequential sweep step
 STAGE_COUNT_COLS = [f"cnt_{i}" for i in range(N_STAGES)]
 SENSITIVE_PORTS = [21, 22, 23, 135, 139, 445, 1433, 3306, 3389, 5900, 5985]
 DEFAULT_INTERNAL = ("10.", "192.168.", "172.16.", "172.17.", "172.18.", "172.19.", "172.2", "172.30.", "172.31.")
@@ -92,12 +95,15 @@ def compute_window_features(df: pd.DataFrame, window_seconds: float, by_host: bo
     tcp = df["proto"] == 6
     df["win_tcp"] = df["init_win"].where(tcp & (df["init_win"] > 0))
     df["ttl_sq"] = df["ttl_std"] ** 2
+    df["pl_bytes"] = df["payload_mean"] * pk
+    df["pl_sq"] = (df["payload_mean"] ** 2 + df["payload_std"] ** 2) * pk
 
     g = df.groupby(keys, sort=True)
     s = g[["pkts", "bytes", "fwd_bytes", "bwd_bytes", "syn", "ack", "fin", "rst", "psh", "urg",
-           "retrans", "small", "udp", "dns", "lateral", "sensitive"]].sum()
+           "retrans", "small", "udp", "dns", "lateral", "sensitive",
+           "frag_pkts", "df_pkts", "payload_small_pkts", "pl_bytes", "pl_sq"]].sum()
     n = g.size()
-    m = g[["duration", "iat_mean", "iat_std", "ttl_mean", "ttl_sq", "win_tcp"]].mean()
+    m = g[["duration", "iat_mean", "iat_std", "iat_max", "ttl_mean", "ttl_sq", "win_tcp"]].mean()
     ttl_var_between = g["ttl_mean"].var(ddof=0)
     win_std = g["win_tcp"].std(ddof=0)
     nun = g[["src_ip", "dst_ip", "dst_port"]].nunique()
@@ -124,16 +130,26 @@ def compute_window_features(df: pd.DataFrame, window_seconds: float, by_host: bo
     out["init_win_std"] = np.log1p(win_std)
     out["log_iat_mean"] = np.log1p(m["iat_mean"] * 1e3)   # ms
     out["log_iat_std"] = np.log1p(m["iat_std"] * 1e3)
+    out["log_iat_max"] = np.log1p(m["iat_max"] * 1e3)
     out["retrans_rate"] = s["retrans"] / tp
+    pl_mean = s["pl_bytes"] / tp
+    out["log_payload_mean"] = np.log1p(pl_mean)
+    out["payload_std"] = np.sqrt(np.maximum(s["pl_sq"] / tp - pl_mean ** 2, 0.0))
+    out["payload_small_frac"] = s["payload_small_pkts"] / tp
+    out["frag_frac"] = s["frag_pkts"] / tp
+    out["df_frac"] = s["df_pkts"] / tp
     out["small_flow_frac"] = s["small"] / n
     out["log_out_in_ratio"] = np.log1p(s["fwd_bytes"]) - np.log1p(s["bwd_bytes"])
     out["lateral_frac"] = s["lateral"] / n
     out["sensitive_port_frac"] = s["sensitive"] / n
     out["udp_frac"] = s["udp"] / n
     out["dns_frac"] = s["dns"] / n
-    out["beacon_score"] = _beacon_score(df, keys)
+    for name, series in _sequence_features(df, keys).items():
+        out[name] = series
     out = out.reindex(columns=BASE_FEATURES).fillna(0.0).astype("float32")
-    out["ttl_missing"] = m["ttl_mean"].isna().astype("int8")  # CICFlowMeter / Argus have no TTL
+    for flag, col in (("ttl_missing", "ttl_mean"), ("payload_missing", "payload_mean"),
+                      ("frag_missing", "frag_pkts"), ("iat_max_missing", "iat_max")):
+        out[flag] = df[col].isna().groupby([df[k] for k in keys]).all().astype("int8")
 
     cnt = df.groupby([*keys, "stage"]).size().unstack(fill_value=0)
     cnt = cnt.reindex(columns=range(N_STAGES), fill_value=0)
@@ -143,18 +159,27 @@ def compute_window_features(df: pd.DataFrame, window_seconds: float, by_host: bo
     return out.reset_index()
 
 
-def _beacon_score(df: pd.DataFrame, keys: list[str]) -> pd.Series:
-    """Periodicity of repeated (src,dst,dport) conversations: 1/(1+CV of start-time gaps)."""
+def _sequence_features(df: pd.DataFrame, keys: list[str]) -> dict[str, pd.Series]:
+    """Per-cell conversation periodicity (beaconing) and port-sweep shape."""
     conv = ["capture", "src_ip", "dst_ip", "dst_port"]
-    d = df[list(dict.fromkeys([*keys, *conv, "ts"]))].sort_values("ts")
+    d = df[list(dict.fromkeys([*keys, *conv, "ts"]))].sort_values("ts", kind="stable")
+    out: dict[str, pd.Series] = {}
+
     d["gap"] = d.groupby(conv, sort=False)["ts"].diff()
-    d = d[d["gap"].notna() & (d["gap"] > 0.5)]
-    if d.empty:
-        return pd.Series(dtype="float32")
-    a = d.groupby(list(dict.fromkeys([*keys, *conv[1:]])), sort=False)["gap"].agg(["mean", "std", "count"])
-    a = a[a["count"] >= 3]
-    score = (1.0 / (1.0 + a["std"] / a["mean"])) * np.minimum(a["count"] / 6.0, 1.0)
-    return score.groupby(level=list(range(len(keys)))).max()
+    rep = d[d["gap"].notna() & (d["gap"] > 0.5)]
+    if not rep.empty:
+        a = rep.groupby(list(dict.fromkeys([*keys, *conv[1:]])), sort=False)["gap"].agg(["mean", "std", "count"])
+        a = a[a["count"] >= 3]
+        score = (1.0 / (1.0 + a["std"] / a["mean"])) * np.minimum(a["count"] / 6.0, 1.0)
+        out["beacon_score"] = score.groupby(level=list(range(len(keys)))).max()
+
+    d["step"] = d.groupby(keys, sort=False)["dst_port"].diff().abs()
+    step = d[d["step"].notna() & (d["step"] > 0)]
+    if not step.empty:
+        agg = step.assign(seq=(step["step"] <= SCAN_STEP).astype("float32")).groupby(keys, sort=False)[["step", "seq"]].mean()
+        out["scan_step_mean"] = np.log1p(agg["step"])
+        out["scan_seq_frac"] = agg["seq"]
+    return out
 
 
 def stage_from_counts(w: pd.DataFrame, rule: str = "dominant") -> np.ndarray:

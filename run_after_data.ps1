@@ -2,7 +2,7 @@
 # Waits for the build_dataset process to exit AND for the cells parquet to exist,
 # then runs the two downstream targets via make.ps1.
 $ErrorActionPreference = 'Continue'
-# Repo root = directory this script lives in (override with -RepoRoot if needed).
+# Repo root = directory this script lives in, so it works from any checkout.
 $r = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 if (-not (Test-Path (Join-Path $r 'make.ps1'))) {
   Write-Error "run_after_data.ps1 must live at the repo root (make.ps1 not found under '$r')"
