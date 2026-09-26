@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sih_v2"
+version = "2.0.0"
+description = "World-model based network attack forecasting (SIH 26153)"
+requires-python = ">=3.10"
+dependencies = ["torch", "numpy", "pandas", "scikit-learn", "pyarrow", "pyyaml", "joblib"]
+
+[project.scripts]
+sih-build-dataset = "sih_v2.cli.build_dataset:main"
+sih-train = "sih_v2.cli.train:main"
+sih-evaluate = "sih_v2.cli.evaluate:main"
+sih-benchmark = "sih_v2.cli.benchmark:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

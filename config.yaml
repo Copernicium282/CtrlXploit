@@ -1,0 +1,125 @@
+seed: 42
+seeds: [0, 1, 2]      # multi-seed runs for confidence intervals
+
+dataset: ctu13        # default dataset for every CLI (override with --dataset)
+protocol: temporal    # default evaluation protocol (temporal | family)
+
+paths:                # {dataset} / {protocol} / {seed} are substituted per run
+  raw_dir: data/raw/{dataset}
+  sample_dir: data/sample
+  cells_dir: data/processed/{dataset}/cells
+  processed: data/processed/{dataset}/cells.parquet
+  model_dir: models/{dataset}/{protocol}
+  model_bundle: models/{dataset}/{protocol}/wm.pt
+  baseline_bundle: models/{dataset}/{protocol}/baselines.joblib
+  reports_dir: reports/{dataset}/{protocol}
+  disk_budget_gb: 7.0
+
+datasets:
+  ctu13:              # PRIMARY: real botnet traffic, CTU University (Garcia et al., 2014), CC BY 2.0
+    url: https://mcfp.felk.cvut.cz/publicDatasets/CTU-13-Dataset/CTU-13-Dataset.tar.bz2
+    mode: host        # one state cell per (scenario, source host, minute)
+    host_prefixes: ["147.32."]      # monitored campus network
+    internal_prefixes: ["147.32."]
+    max_benign_hosts: 100           # per scenario: every infected host + 100 most active benign hosts
+    min_active_windows: 10
+    stage_rule: dominant
+    keep_raw: false                 # delete each .binetflow as soon as its cells are written
+    overrides:                      # chosen by a validation-only sweep (seed 0): noise 0.1 -> 0.728, 0.25 -> 0.713, 0.5 -> 0.689
+      train: {input_noise: 0.1}
+    family_split:
+      train: ["1", "2", "3", "4", "6", "7", "9", "10", "11"]   # Neris, Rbot, Menti, Sogou
+      val: ["12"]                                           # NSIS.ay
+      test: ["5", "8", "13"]                                # Virut, Murlo
+  cic2018:            # SECONDARY: CSE-CIC-IDS2018 processed CSVs (no host IPs in most day files)
+    url: https://cse-cic-ids2018.s3.ca-central-1.amazonaws.com/Processed%20Traffic%20Data%20for%20ML%20Algorithms/
+    mode: network
+    stage_rule: dominant
+    keep_raw: false
+    days: [Wednesday-14-02-2018, Thursday-15-02-2018, Friday-16-02-2018, Wednesday-21-02-2018,
+           Thursday-22-02-2018, Friday-23-02-2018, Wednesday-28-02-2018, Thursday-01-03-2018,
+           Friday-02-03-2018]
+    overrides:                      # ~1.7k training cells: a smaller, more regularised model
+      model: {embed_dim: 32, lstm_hidden: 32, deter_dim: 64, stoch_dim: 8, dropout: 0.3}
+      train: {epochs: 40, patience: 10, benign_stride: 1, max_seq_per_epoch: null, batch_size: 64}
+      baselines: {stack_windows: 8}
+    family_split:
+      train: [Wednesday-14-02-2018, Thursday-15-02-2018, Friday-16-02-2018, Wednesday-21-02-2018, Thursday-22-02-2018]
+      val: [Friday-23-02-2018, Wednesday-28-02-2018]
+      test: [Thursday-01-03-2018, Friday-02-03-2018]
+  synthetic:          # CONTROLLED: generated campaigns; the only data with true pre-attack windows
+    mode: network
+    stage_rule: priority
+
+synthetic:            # representative CSE-CIC-IDS2018-style telemetry generator
+  episodes: 96        # independent monitoring segments (each = one site/day slice)
+  windows_per_episode: 200
+  benign_flows_per_window: 30
+  campaign_prob: 0.75 # fraction of episodes that contain a full kill-chain campaign
+  decoy_recon_prob: 0.35   # recon/noise that is NOT followed by exploitation
+  stealth_prob: 0.12       # campaigns with little/no reconnaissance precursor
+
+ingest:
+  chunksize: 200000         # rows per chunk -> bounded memory (<16 GB for any file size)
+  segment_gap_windows: 10   # a time gap larger than this starts a new segment
+
+features:
+  window_seconds: 60
+  ema_short: 3              # multi-scale temporal statistics (in windows)
+  ema_long: 15
+
+forecast:
+  horizon: 10               # H: predict exploitation within the next H windows
+  context: 24               # L: windows of history fed to the world model
+
+split:                      # temporal protocol: chronological cut per capture + purge gap
+  train: 0.7
+  val: 0.15
+  test: 0.15
+
+model:
+  embed_dim: 64
+  lstm_hidden: 64
+  attn_heads: 4
+  attn_layers: 1
+  deter_dim: 128            # h_t  (deterministic GRU state)
+  stoch_dim: 16             # z_t  (stochastic latent)
+  dropout: 0.2
+
+train:
+  epochs: 15
+  batch_size: 128
+  lr: 0.001
+  weight_decay: 0.05
+  input_noise: 0.5         # Gaussian telemetry-jitter augmentation (scaled units)
+  benign_volume_aug: 0.3   # share of benign-only sequences given a x2..x20 flash-crowd volume surge
+  kl_beta: 0.5
+  free_nats: 1.0
+  w_recon: 1.0
+  w_stage: 1.0
+  w_forecast: 2.0
+  w_prewarn: 3.0           # extra weight on true pre-attack (early-warning) positives
+  w_rollout_stage: 1.0
+  w_rollout_recon: 0.2
+  patience: 4
+  benign_stride: 12         # sequences from benign-only host-slots are sampled every 12 windows
+  max_seq_per_epoch: 40000  # random subset of training sequences per epoch (time bound)
+  select_metric: mix        # model selection: mean of early-warning PR-AUC and PR-AUC on validation
+  device: cpu
+
+engine:
+  particles: 32             # Monte-Carlo particles per rollout
+  rollout_steps: 10         # K (defaults to forecast.horizon)
+  tune_fusion: true         # re-fit fusion weights on validation (early-warning PR-AUC)
+  fusion:                   # risk = weighted fusion of three independent estimators (initial)
+    direct: 0.5
+    rollout: 0.35
+    markov: 0.15
+  max_fpr: 0.05             # threshold calibration constraint on validation benign windows
+  alert_min_consecutive: 1
+  surprise_z: 3.0           # anomaly channel: robust z (median/MAD within capture) above which a host is flagged
+
+baselines:
+  stack_windows: 8          # history given to the stacked LR / GBM / RF baselines
+  max_train_rows: 200000    # subsample cap for the sklearn baselines (memory/time bound)
+  stage_train_rows: 30000   # per-horizon multinomial stage LR (7 classes x 744 features) row cap
