@@ -1,4 +1,4 @@
-# SIH 26153 · AI based Network Attack Forecasting (NTRO): NetWorldModel v2
+# SIH 26153 · AI based Network Attack Forecasting (NTRO): NetWorldModel
 
 Per-host latent world model of network traffic that forecasts attack progression, with K-step particle simulation,
 MITRE ATT&CK mapping, a label-free surprise channel and leakage-checked evaluation on **real CTU-13 and CSE-CIC-IDS2018
@@ -28,5 +28,4 @@ and are pulled by `make fetch-data`. **What is rebuilt:** `make data` regenerate
 - **Stage forecasting:** the world model beats persistence at +10 min (0.669 vs 0.581). A stacked per-horizon classifier is better at +5 to +10 min.
 - **Unseen malware families:** supervised methods fail (PR-AUC ≤ 0.16), but the label-free surprise channel still reaches host AUC 0.85.
 
-Full guide and all results: [docs/README.md](docs/README.md) · Architecture: [docs/architecture.md](docs/architecture.md) ·
-Slides: [docs/presentation_slides.md](docs/presentation_slides.md) · Credits: [docs/provenance.md](docs/provenance.md)
+Full guide and all results: [docs/README.md](docs/README.md) · Architecture: [docs/architecture.md](docs/architecture.md) · Credits: [docs/provenance.md](docs/provenance.md)
