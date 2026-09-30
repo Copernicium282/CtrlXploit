@@ -61,7 +61,10 @@ which is real traffic the model never saw during training.
    **Replay position** to the right. Everything right of the cursor is the future the model has not seen.
 2. **LIVE MONITOR:** the red line is the forecast risk and the yellow line is the alert threshold. The shading is the
    truth (amber = attack coming within 10 min, red = attack under way). The two colour strips compare the true and
-   predicted MITRE stage; the blue line is the label-free surprise.
+   predicted MITRE stage; the blue line is the label-free surprise. At the top, **Current stage (model estimate)** is
+   what the host is doing *now* (detection), while **10-min forecast status** (EARLY WARNING / NORMAL) and **Predicted
+   next stage (next 10 min)** are about *where it is heading* (forecasting). So "Current stage: Impact" with
+   "forecast status: NORMAL" means *attacking now, but no new escalation expected above the threshold*.
 3. **HOST TRIAGE:** every machine ranked by two independent signals: supervised **risk** and label-free **anomaly**.
 4. **FORWARD SIM:** the 32 imagined futures for the next 10 minutes, with a table comparing them to what really happened.
 5. **MITRE ATT&CK** and **EXPLAIN:** the attack stage now vs forecast; which past minutes (attention) and which features
