@@ -206,6 +206,7 @@ def rollout_fig(res, gi: int, window_min: float):
 
 
 def status_of(risk: float, thr: float):
+    """Status of the 10-minute FORECAST: EARLY WARNING once the forecast risk crosses the threshold."""
     if risk < thr:
         return "OK", "NORMAL"
     return ("CRITICAL" if risk >= 0.9 else "HIGH" if risk >= 0.75 else "MEDIUM"), "EARLY WARNING"
@@ -223,7 +224,15 @@ with st.sidebar:
     model_label = st.selectbox("Model", list(models), index=0)
     ds, pr = models[model_label]
     cfg, bundle, pack = get_bundle(ds, pr)
-    src = st.radio("Telemetry source", ["Held-out test split (labelled)", *SAMPLES, "Upload file"], index=0)
+    # Offer only sources whose files exist, so a fresh clone never opens on a crash:
+    # the held-out split needs `make fetch-data`; the bundled samples ship in data/sample/.
+    has_test = resolve(cfg["paths"]["processed"]).exists()
+    samples = [k for k, v in SAMPLES.items() if resolve(v).exists()]
+    sources = (["Held-out test split (labelled)"] if has_test else []) + samples + ["Upload file"]
+    src = st.radio("Telemetry source", sources, index=0)
+    if not has_test:
+        st.warning("Held-out real-data split not downloaded yet. Run **`make fetch-data`** "
+                   "(Windows: **`.\\make.ps1 fetch-data`**) once - about 25 s - then refresh this page.")
     up = None
     if src == "Upload file":
         up = st.file_uploader("CSV (CIC-IDS2017/2018, CTU-13 binetflow, UNSW, NetFlow export), Parquet, PCAP/PCAPNG",
@@ -257,6 +266,11 @@ with st.sidebar:
                 f"Trained {bundle.meta.get('trained_at', '?')}</div>", unsafe_allow_html=True)
 
 # ----------------------------------------------------------------------------- run
+if not has_test:
+    st.info(("**Demo mode:** showing the bundled sample data. " if samples else "**No data found yet.** ")
+            + "The real CTU-13 / CIC-IDS2018 held-out test views "
+            "(and the benchmark numbers behind them) appear after a one-time **`make fetch-data`** "
+            "(Windows: **`.\\make.ps1 fetch-data`**), about 25 s. Everything runs offline afterwards.")
 if src == "Held-out test split (labelled)":
     res, states, stats = load_test(ds, pr, particles, steps)
 elif src == "Upload file":
@@ -351,10 +365,12 @@ with tabs[0]:
     sev, state = status_of(row["risk"], thr)
     k = st.columns(6)
     k[0].metric("Fused risk", f"{row['risk']:.2f}", f"{row['risk'] - f['risk'].iloc[max(pos - 1, 0)]:+.2f}")
-    k[1].markdown(f"**Status**<br><span class='sev-{sev}' style='font-size:1.3rem'>{state}</span>"
+    k[1].markdown(f"**10-min forecast status**<br><span class='sev-{sev}' style='font-size:1.3rem'>{state}</span>"
                   f"<br><span class='small'>{sev}</span>", unsafe_allow_html=True)
-    k[2].metric("Observed stage (model)", row["current_stage_pred"])
-    k[3].metric("Forecast next stage", row["forecast_stage"] if row["risk"] >= thr else "-")
+    k[2].metric("Current stage (model estimate)", row["current_stage_pred"],
+                help="The model's estimate of what this host is doing now (detection). Compare with the 'truth' strip below.")
+    k[3].metric("Predicted next stage (next 10 min)", row["forecast_stage"] if row["risk"] >= thr else "-",
+                help="The exploitation stage the imagined futures reach within the horizon (shown when risk >= threshold).")
     eta = row["eta_windows"]
     k[4].metric("ETA to exploitation", f"{eta * WMIN:.0f} min" if eta > 0 and row["risk"] >= thr else "-")
     k[5].metric("Surprise z", f"{row['surprise_z']:.1f}", "novel" if row["surprise_z"] >= zthr else "typical",
@@ -380,8 +396,8 @@ with tabs[0]:
             r = f.iloc[p]
             s_, t_ = status_of(r["risk"], thr)
             ph.markdown(f"**t = {r['time']:%H:%M}** · risk **{r['risk']:.2f}** · surprise z {r['surprise_z']:.1f} · "
-                        f"<span class='sev-{s_}'>{t_}</span> · stage `{r['current_stage_pred']}`"
-                        + (f" · forecast `{r['forecast_stage']}`" if r["risk"] >= thr else ""), unsafe_allow_html=True)
+                        f"<span class='sev-{s_}'>{t_}</span> · current stage `{r['current_stage_pred']}`"
+                        + (f" · predicted next `{r['forecast_stage']}`" if r["risk"] >= thr else ""), unsafe_allow_html=True)
             time.sleep(0.08)
 
     def _jump(first=np.flatnonzero(f["risk"].to_numpy() >= thr)):
