@@ -1,29 +1,36 @@
-# SIH 26153: AI based Network Attack Forecasting (NTRO) · NetWorldModel
+# ThreatAhead (team CtrlXploit): full guide · SIH 26153 · AI based Network Attack Forecasting (NTRO)
 
 An offline, CPU-only system that learns a latent **world model of network traffic dynamics** and uses it to forecast
 attack progression. It is trained and evaluated on **real traffic** (CTU-13, CSE-CIC-IDS2018) under leakage-safe
 protocols, against re-implementations of the approaches in every public SIH-26153 repository we could read.
 
----## 1. Quick start
+---
+
+## 1. Quick start
 
 ```bash
-make setup        # venv + pinned dependencies + this package, installed editable
-make app          # serves the dashboard
+make setup        # venv + pinned dependencies + this package, installed editable   (first time, ~3-8 min)
+make fetch-data   # processed datasets from Hugging Face, ~250 MB                     (first time, ~25 s)
+make app          # serves the dashboard at http://localhost:8501
 ```
-On Windows (no `make`): `.\make.ps1 setup` then `.\make.ps1 app`. Without either helper:
+On Windows (no `make`): `.\make.ps1 setup`, `.\make.ps1 fetch-data`, then `.\make.ps1 app`. Without either helper:
 `python -m venv .venv`, then `.venv/bin/python -m pip install -r requirements.txt` and
 `.venv/bin/python -m pip install -e .` (`.venv\Scripts\python` on Windows), then
 `.venv/bin/python -m streamlit run app.py`.
 
-**What ships in the repo:** trained bundles (`models/`), every report (`reports/`, `eval/results/`) and the three
-bundled sample files under `data/sample/`. The demo path below therefore runs fully offline with nothing to download
-or train. **What does not ship:** the processed datasets themselves (`data/processed/`), because they are rebuilt from
-the public sources by `make data` (CTU-13 streams 1.9 GB and CIC-IDS2018 nine days, ~0.3 GB kept, hours of CPU);
-`data/raw/` is deleted file by file as the build proceeds. Sample-based tabs work without that rebuild;
-the CTU-13/CIC-2018 model tabs need `make data` first, and say so in the dashboard when a table is missing.
+**What ships in the repo:** trained bundles (`models/`), every report (`reports/`, `eval/results/`) and three small
+**synthetic** sample files under `data/sample/` (CIC CSV, CTU-13 binetflow and PCAP formats, used for the upload demo).
+**What is downloaded once:** the processed real datasets (`data/processed/`, ~250 MB including the 123 MB CTU-13 file,
+too big for GitHub) from the public Hugging Face dataset
+[ir192m2Cn282/ThreatAhead](https://huggingface.co/datasets/ir192m2Cn282/ThreatAhead), via `make fetch-data`. After
+that, everything runs offline. **What can be rebuilt instead:** `make data` regenerates the processed data from the
+public sources (CTU-13 streams 1.9 GB and CIC-IDS2018 nine days, ~0.3 GB kept, hours of CPU). If the processed data is
+missing, the dashboard opens in *demo mode* on the bundled samples and shows the fetch command; it does not crash.
 
 **A 4-minute demo path:**
-1. **Sidebar → Model:** *CTU-13 · real botnet traffic · per-host · temporal split*. The host picker opens on an infected machine.
+1. **Sidebar → Model:** *CTU-13 · real botnet traffic · per-host · temporal split*, with **Telemetry source: Held-out
+   test split**. The host picker opens on the top-ranked infected machine; for the clearest example choose
+   `8 · 147.32.84.165 · 2011-08-17 06:52` and drag the replay cursor to the right.
 2. **Live Monitor:**
    - Drag the **replay cursor**. Right of the cursor is the future the model hasn't seen.
    - Watch the risk curve, the model's stage strip against the true stage strip, and the label-free **surprise** track.
@@ -46,8 +53,13 @@ make data        # streams CTU-13 (1.9 GB) and CIC-IDS2018 (9 days) one file at 
 make train       # 3 seeds per dataset/protocol + all baselines  (~2.5 h CPU)
 make evaluate    # reports/<dataset>/<protocol>/evaluation.md
 make eval        # eval/results/comparison.md + ablation
-make test        # the full pytest suite
+make test        # the full pytest suite (39 tests; run `make fetch-data` first - some tests read the real data)
 ```
+**Feature set note:** the shipped models and the Hugging Face data use the original 31 cell features (93 inputs). The
+current code adds 8 packet-level features (39 features, 117 inputs). Inference and uploads work with the shipped
+models, because each model carries its own feature list. **Retraining needs `make data` first**: the fetched data lacks
+the new columns, so `make train` on fetched data stops with missing columns. Retrained models will report slightly
+different numbers from section 4.
 On Windows the same targets exist as `.\make.ps1 setup|data|train|evaluate|eval|benchmark|test|app` (Windows
 PowerShell 5.1 or PowerShell 7; from cmd.exe: `powershell -File make.ps1 setup`), or
 `.\make.ps1 ctu13|cic2018|synthetic` for one dataset end to end. Neither helper is required: the Makefile resolves
@@ -64,7 +76,7 @@ checkout (it stores an absolute path). Re-run the setup step above *in this chec
 
 All settings live in `config.yaml`, including per-dataset overrides and the 7 GB disk budget, which is checked after every file.
 
-## 4. How the forward simulation works
+## 3. How the forward simulation works
 
 ```
 last 24 min of telemetry ─► encoder → LSTM → causal Transformer        (attention = which minutes mattered)
@@ -75,7 +87,7 @@ fusion                   ─► w_d·direct + w_r·rollout + w_m·Markov first-p
 surprise                 ─► ‖decoder(h_t, prior mean) − x_t‖² and KL(q‖p), robust-z within capture
 ```
 
-## 5. Results
+## 4. Results
 
 All numbers are measured by us on held-out data. Every method uses identical features, labels, splits and threshold rule
 (F1-optimal subject to FPR ≤ 5% on validation, frozen before test). Deep models show the mean over 3 seeds.
@@ -140,7 +152,7 @@ Our rollout gives the best stage forecast from +3 minutes onward (+10 min: 0.423
 - The CTU-13 family run used the earlier noise value (0.5).
 - Numbers the public repos report are listed in `eval/results/comparison.md`. They are **not comparable** (different data, cells and splits).
 
-## 6. Layout
+## 5. Layout
 ```
 app.py                         Streamlit SOC dashboard (7 tabs)
 config.yaml                    datasets, protocols, overrides, disk budget
@@ -151,6 +163,6 @@ src/sih_v2/engine/             simulation + surprise, calibration + ensemble, al
 src/sih_v2/cli/                build_dataset · train · evaluate · benchmark
 eval/                          compare_baselines.py · ablation.py · results/
 reports/<dataset>/<protocol>/  evaluation.md · metrics.json · host_triage.csv · stage_horizon.csv · predictions
-docs/                          README.md · architecture.md · presentation_slides.md · provenance.md
-tests/                         36 tests
+docs/                          README.md · architecture.md · provenance.md · img/
+tests/                         39 tests (pytest)
 ```

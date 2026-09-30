@@ -223,7 +223,15 @@ with st.sidebar:
     model_label = st.selectbox("Model", list(models), index=0)
     ds, pr = models[model_label]
     cfg, bundle, pack = get_bundle(ds, pr)
-    src = st.radio("Telemetry source", ["Held-out test split (labelled)", *SAMPLES, "Upload file"], index=0)
+    # Offer only sources whose files exist, so a fresh clone never opens on a crash:
+    # the held-out split needs `make fetch-data`; the bundled samples ship in data/sample/.
+    has_test = resolve(cfg["paths"]["processed"]).exists()
+    samples = [k for k, v in SAMPLES.items() if resolve(v).exists()]
+    sources = (["Held-out test split (labelled)"] if has_test else []) + samples + ["Upload file"]
+    src = st.radio("Telemetry source", sources, index=0)
+    if not has_test:
+        st.warning("Held-out real-data split not downloaded yet. Run **`make fetch-data`** "
+                   "(Windows: **`.\\make.ps1 fetch-data`**) once - about 25 s - then refresh this page.")
     up = None
     if src == "Upload file":
         up = st.file_uploader("CSV (CIC-IDS2017/2018, CTU-13 binetflow, UNSW, NetFlow export), Parquet, PCAP/PCAPNG",
@@ -257,6 +265,11 @@ with st.sidebar:
                 f"Trained {bundle.meta.get('trained_at', '?')}</div>", unsafe_allow_html=True)
 
 # ----------------------------------------------------------------------------- run
+if not has_test:
+    st.info(("**Demo mode:** showing the bundled sample data. " if samples else "**No data found yet.** ")
+            + "The real CTU-13 / CIC-IDS2018 held-out test views "
+            "(and the benchmark numbers behind them) appear after a one-time **`make fetch-data`** "
+            "(Windows: **`.\\make.ps1 fetch-data`**), about 25 s. Everything runs offline afterwards.")
 if src == "Held-out test split (labelled)":
     res, states, stats = load_test(ds, pr, particles, steps)
 elif src == "Upload file":

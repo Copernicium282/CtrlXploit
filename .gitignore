@@ -11,3 +11,6 @@ data/*
 # written into local_dir by huggingface_hub snapshot_download() when fetch-data runs
 .cache/
 .huggingface/
+
+# created by `pip install -e .` (make setup)
+*.egg-info/
